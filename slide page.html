@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Song Lyrics PPT Slides Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati&family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Noto Sans Gujarati', 'Noto Sans Devanagari', sans-serif;
+    background: #f5f6fa;
+    color: #222;
+  }
+  header {
+    background: #2a4fa7;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 22px;
+    font-weight: bold;
+  }
+  #searchBar {
+    display: block;
+    width: 90%;
+    margin: 15px auto;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  #songList {
+    list-style: none;
+    padding: 0;
+    margin: 0 15px;
+  }
+  .song-item {
+    background: white;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .song-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .lang-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    padding: 8px 14px;
+    background: #2a4fa7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover {
+    background: #1f3f84;
+  }
+
+  /* === Fullscreen PPTX Viewer === */
+  #viewerContainer {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: black;
+    color: white;
+    z-index: 9999;
+    flex-direction: column;
+  }
+  #viewerHeader {
+    background: #1f3f84;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #viewerHeader h2 {
+    margin: 0;
+    font-size: 18px;
+    color: white;
+  }
+  #closeViewer {
+    background: red;
+    border: none;
+    color: white;
+    font-size: 16px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #pptFrame {
+    flex-grow: 1;
+    width: 100%;
+    border: none;
+  }
+</style>
+</head>
+<body>
+
+<header>🎵 Song Lyrics PPT Slides Viewer 🎶</header>
+
+<input type="text" id="searchBar" placeholder="Search song by name...">
+
+<ul id="songList"></ul>
+
+<!-- Fullscreen PowerPoint Viewer -->
+<div id="viewerContainer">
+  <div id="viewerHeader">
+    <h2 id="viewerTitle"></h2>
+    <button id="closeViewer">✕ Close</button>
+  </div>
+  <iframe id="pptFrame" allowfullscreen></iframe>
+</div>
+
+<script>
+// === SONG DATA ===
+// Replace the sample links below with your actual PPTX URLs
+const songs = [
+  {
+    name: "Yeshu Taro Prem",
+    gujarati: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample1.pptx",
+    hindi: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample2.pptx"
+  },
+  {
+    name: "Hallelujah Geet",
+    gujarati: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample3.pptx",
+    hindi: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample4.pptx"
+  },
+  {
+    name: "Anand Geet",
+    gujarati: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample5.pptx",
+    hindi: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample6.pptx"
+  }
+];
+
+const songList = document.getElementById("songList");
+const searchBar = document.getElementById("searchBar");
+const viewerContainer = document.getElementById("viewerContainer");
+const pptFrame = document.getElementById("pptFrame");
+const viewerTitle = document.getElementById("viewerTitle");
+const closeViewer = document.getElementById("closeViewer");
+
+// === Render Song List ===
+function renderList(filter = "") {
+  songList.innerHTML = "";
+  songs
+    .filter(s => s.name.toLowerCase().includes(filter.toLowerCase()))
+    .forEach(song => {
+      const li = document.createElement("li");
+      li.className = "song-item";
+
+      const title = document.createElement("div");
+      title.className = "song-title";
+      title.textContent = song.name;
+
+      const btns = document.createElement("div");
+      btns.className = "lang-buttons";
+
+      const gujBtn = document.createElement("button");
+      gujBtn.textContent = "Gujarati";
+      gujBtn.onclick = () => openViewer(song.name + " (Gujarati)", song.gujarati);
+
+      const hinBtn = document.createElement("button");
+      hinBtn.textContent = "Hindi";
+      hinBtn.onclick = () => openViewer(song.name + " (Hindi)", song.hindi);
+
+      btns.appendChild(gujBtn);
+      btns.appendChild(hinBtn);
+
+      li.appendChild(title);
+      li.appendChild(btns);
+      songList.appendChild(li);
+    });
+}
+
+// === Open PPTX Viewer in Fullscreen ===
+function openViewer(title, pptUrl) {
+  viewerTitle.textContent = title;
+  pptFrame.src = pptUrl;
+  viewerContainer.style.display = "flex";
+
+  // Request fullscreen automatically
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) elem.requestFullscreen();
+  else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+  else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+}
+
+// === Close Viewer ===
+closeViewer.onclick = () => {
+  pptFrame.src = "";
+  viewerContainer.style.display = "none";
+  if (document.exitFullscreen) document.exitFullscreen();
+  else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  else if (document.msExitFullscreen) document.msExitFullscreen();
+};
+
+// === Search Function ===
+searchBar.addEventListener("input", () => renderList(searchBar.value));
+
+// === Initialize ===
+renderList();
+</script>
+
+</body>
+</html>
