@@ -63,7 +63,6 @@
     background: #1f3f84;
   }
 
-  /* === Fullscreen PPTX Viewer === */
   #viewerContainer {
     display: none;
     position: fixed;
@@ -110,7 +109,6 @@
 
 <ul id="songList"></ul>
 
-<!-- Fullscreen PowerPoint Viewer -->
 <div id="viewerContainer">
   <div id="viewerHeader">
     <h2 id="viewerTitle"></h2>
@@ -120,23 +118,21 @@
 </div>
 
 <script>
-// === SONG DATA ===
-// Replace the sample links below with your actual PPTX URLs
 const songs = [
   {
     name: "Yeshu Taro Prem",
-    gujarati: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample1.pptx",
-    hindi: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample2.pptx"
+    gujarati: "assets/pptx/sample1.pptx",
+    hindi: "assets/pptx/sample2.pptx"
   },
   {
     name: "Hallelujah Geet",
-    gujarati: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample3.pptx",
-    hindi: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample4.pptx"
+    gujarati: "assets/pptx/sample3.pptx",
+    hindi: "assets/pptx/sample4.pptx"
   },
   {
     name: "Anand Geet",
-    gujarati: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample5.pptx",
-    hindi: "https://view.officeapps.live.com/op/embed.aspx?src=https://file-examples.com/storage/fe1b2a2/pptx/sample6.pptx"
+    gujarati: "assets/pptx/sample5.pptx",
+    hindi: "assets/pptx/sample6.pptx"
   }
 ];
 
@@ -147,7 +143,6 @@ const pptFrame = document.getElementById("pptFrame");
 const viewerTitle = document.getElementById("viewerTitle");
 const closeViewer = document.getElementById("closeViewer");
 
-// === Render Song List ===
 function renderList(filter = "") {
   songList.innerHTML = "";
   songs
@@ -180,20 +175,16 @@ function renderList(filter = "") {
     });
 }
 
-// === Open PPTX Viewer in Fullscreen ===
 function openViewer(title, pptUrl) {
   viewerTitle.textContent = title;
   pptFrame.src = pptUrl;
   viewerContainer.style.display = "flex";
-
-  // Request fullscreen automatically
   const elem = document.documentElement;
   if (elem.requestFullscreen) elem.requestFullscreen();
   else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
   else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
 }
 
-// === Close Viewer ===
 closeViewer.onclick = () => {
   pptFrame.src = "";
   viewerContainer.style.display = "none";
@@ -202,13 +193,9 @@ closeViewer.onclick = () => {
   else if (document.msExitFullscreen) document.msExitFullscreen();
 };
 
-// === Search Function ===
 searchBar.addEventListener("input", () => renderList(searchBar.value));
-
-// === Initialize ===
 renderList();
 </script>
 
 </body>
 </html>
-
