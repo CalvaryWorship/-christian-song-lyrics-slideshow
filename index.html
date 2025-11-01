@@ -99,6 +99,7 @@
     flex-grow: 1;
     width: 100%;
     border: none;
+    background: white;
   }
 </style>
 </head>
@@ -110,31 +111,31 @@
 
 <ul id="songList"></ul>
 
-<!-- Fullscreen PowerPoint Viewer -->
+<!-- Fullscreen Viewer -->
 <div id="viewerContainer">
   <div id="viewerHeader">
     <h2 id="viewerTitle"></h2>
     <button id="closeViewer">✕ Close</button>
   </div>
-  <iframe id="pptFrame" allowfullscreen></iframe>
+  <iframe id="pptFrame"></iframe>
 </div>
 
 <script>
 const songs = [
-{
-    name: "65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise ",
+  {
+    name: "65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise",
     gujarati: "assets/pptx/65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise GUJ.pdf",
     hindi: "assets/pptx/65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise - HINDI.pdf"
   },
   {
     name: "Hallelujah Geet",
-    gujarati: "assets/pptx/sample3.pptx",
-    hindi: "assets/pptx/sample4.pptx"
+    gujarati: "assets/pptx/sample3.pdf",
+    hindi: "assets/pptx/sample4.pdf"
   },
   {
     name: "Anand Geet",
-    gujarati: "assets/pptx/sample5.pptx",
-    hindi: "assets/pptx/sample6.pptx"
+    gujarati: "assets/pptx/sample5.pdf",
+    hindi: "assets/pptx/sample6.pdf"
   }
 ];
 
@@ -145,7 +146,7 @@ const pptFrame = document.getElementById("pptFrame");
 const viewerTitle = document.getElementById("viewerTitle");
 const closeViewer = document.getElementById("closeViewer");
 
-// === Render Song List ===
+// Render Song List
 function renderList(filter = "") {
   songList.innerHTML = "";
   const filtered = songs.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
@@ -182,51 +183,39 @@ function renderList(filter = "") {
   });
 }
 
-// === Open PPTX Viewer in Fullscreen ===
-function openViewer(title, pptUrl) {
+// Open Viewer
+function openViewer(title, fileUrl) {
   viewerTitle.textContent = title;
-
-  // Use Microsoft Office Online viewer for PPTX files
-  const fileUrl = `${location.origin}/${pptUrl}`;
-  pptFrame.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
-
+  pptFrame.src = fileUrl;
   viewerContainer.style.display = "flex";
 
-  // Request fullscreen
+  // Enter fullscreen
   const elem = document.documentElement;
   if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
   else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
   else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
 }
 
-// === Close Viewer (Fixed) ===
+// Close Viewer
 closeViewer.onclick = () => {
-  pptFrame.src = ""; // clear iframe content
-  viewerContainer.style.display = "none"; // hide viewer
-
-  // safely exit fullscreen
-  setTimeout(() => {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
-    else if (document.msFullscreenElement) document.msExitFullscreen();
-  }, 200);
+  pptFrame.src = "";
+  viewerContainer.style.display = "none";
+  if (document.fullscreenElement) document.exitFullscreen();
 };
 
-// Also close viewer when ESC key pressed
+// ESC key to close
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && viewerContainer.style.display === "flex") {
     closeViewer.click();
   }
 });
 
-// === Search Function ===
+// Search
 searchBar.addEventListener("input", () => renderList(searchBar.value));
 
-// === Initialize ===
+// Initialize
 renderList();
 </script>
 
 </body>
 </html>
-
-
