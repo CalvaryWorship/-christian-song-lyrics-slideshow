@@ -63,6 +63,7 @@
     background: #1f3f84;
   }
 
+  /* === Fullscreen Viewer === */
   #viewerContainer {
     display: none;
     position: fixed;
@@ -109,6 +110,7 @@
 
 <ul id="songList"></ul>
 
+<!-- Fullscreen PowerPoint Viewer -->
 <div id="viewerContainer">
   <div id="viewerHeader">
     <h2 id="viewerTitle"></h2>
@@ -119,7 +121,7 @@
 
 <script>
 const songs = [
-  {
+{
     name: "65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise ",
     gujarati: "assets/pptx/65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise GUJ.pptx",
     hindi: "assets/pptx/65, જલકે લિયે હાંફતી જૈસે હિરણી जलके लिये हांफती जैसे हिरणी  Jal Keliye Hafti Jaise - HINDI.pptx"
@@ -143,60 +145,86 @@ const pptFrame = document.getElementById("pptFrame");
 const viewerTitle = document.getElementById("viewerTitle");
 const closeViewer = document.getElementById("closeViewer");
 
+// === Render Song List ===
 function renderList(filter = "") {
   songList.innerHTML = "";
-  songs
-    .filter(s => s.name.toLowerCase().includes(filter.toLowerCase()))
-    .forEach(song => {
-      const li = document.createElement("li");
-      li.className = "song-item";
+  const filtered = songs.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
+  if (filtered.length === 0) {
+    songList.innerHTML = "<p style='text-align:center; color:#555;'>No songs found.</p>";
+    return;
+  }
 
-      const title = document.createElement("div");
-      title.className = "song-title";
-      title.textContent = song.name;
+  filtered.forEach(song => {
+    const li = document.createElement("li");
+    li.className = "song-item";
 
-      const btns = document.createElement("div");
-      btns.className = "lang-buttons";
+    const title = document.createElement("div");
+    title.className = "song-title";
+    title.textContent = song.name;
 
-      const gujBtn = document.createElement("button");
-      gujBtn.textContent = "Gujarati";
-      gujBtn.onclick = () => openViewer(song.name + " (Gujarati)", song.gujarati);
+    const btns = document.createElement("div");
+    btns.className = "lang-buttons";
 
-      const hinBtn = document.createElement("button");
-      hinBtn.textContent = "Hindi";
-      hinBtn.onclick = () => openViewer(song.name + " (Hindi)", song.hindi);
+    const gujBtn = document.createElement("button");
+    gujBtn.textContent = "Gujarati";
+    gujBtn.onclick = () => openViewer(song.name + " (Gujarati)", song.gujarati);
 
-      btns.appendChild(gujBtn);
-      btns.appendChild(hinBtn);
+    const hinBtn = document.createElement("button");
+    hinBtn.textContent = "Hindi";
+    hinBtn.onclick = () => openViewer(song.name + " (Hindi)", song.hindi);
 
-      li.appendChild(title);
-      li.appendChild(btns);
-      songList.appendChild(li);
-    });
+    btns.appendChild(gujBtn);
+    btns.appendChild(hinBtn);
+
+    li.appendChild(title);
+    li.appendChild(btns);
+    songList.appendChild(li);
+  });
 }
 
+// === Open PPTX Viewer in Fullscreen ===
 function openViewer(title, pptUrl) {
   viewerTitle.textContent = title;
-  pptFrame.src = pptUrl;
+
+  // Use Microsoft Office Online viewer for PPTX files
+  const fileUrl = `${location.origin}/${pptUrl}`;
+  pptFrame.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+
   viewerContainer.style.display = "flex";
+
+  // Request fullscreen
   const elem = document.documentElement;
-  if (elem.requestFullscreen) elem.requestFullscreen();
+  if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
   else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
   else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
 }
 
+// === Close Viewer (Fixed) ===
 closeViewer.onclick = () => {
-  pptFrame.src = "";
-  viewerContainer.style.display = "none";
-  if (document.exitFullscreen) document.exitFullscreen();
-  else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-  else if (document.msExitFullscreen) document.msExitFullscreen();
+  pptFrame.src = ""; // clear iframe content
+  viewerContainer.style.display = "none"; // hide viewer
+
+  // safely exit fullscreen
+  setTimeout(() => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+    else if (document.msFullscreenElement) document.msExitFullscreen();
+  }, 200);
 };
 
+// Also close viewer when ESC key pressed
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && viewerContainer.style.display === "flex") {
+    closeViewer.click();
+  }
+});
+
+// === Search Function ===
 searchBar.addEventListener("input", () => renderList(searchBar.value));
+
+// === Initialize ===
 renderList();
 </script>
 
 </body>
 </html>
-
